@@ -18,10 +18,10 @@
     <link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css"/>
     <script type="text/javascript" src="/static/datatables/datatables.min.js"></script>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/bootstrap-slider.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/css/bootstrap-slider.min.css" />
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/bootstrap-slider.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.2.0/css/bootstrap-slider.min.css" />
 
-    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="//code.highcharts.com/highcharts.js"></script>
 
     <!--[if lt IE 9]>
       <script type="text/javascript" src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -117,8 +117,13 @@
           </button>
           <strong>Stop!</strong> This election was determined by random tiebreaking. Manual intervention may be required to correctly decide results.
         </div>
-        <div style="margin-bottom: 1em; padding-right: 1.5em; padding-left: 1.5em;">
-          <input id="electionRound" data-slider-id="electionRound" type="text" data-slider-min="1" data-slider-step="1" style="width: 100%;">
+        <div>
+          <div style="margin-bottom: .75em; padding-right: 1.5em; padding-left: 1.5em; display: inline; width: 92.5%; float: left;">
+            <input id="electionRound" data-slider-id="electionRound" type="text" data-slider-min="1" data-slider-step="1" style="width: 100%;">
+          </div>
+          <button class="btn btn-primary" type="button" id="playPauseElectionRounds" style="display: inline; float: right; z-index: 10000;">
+            <i class="fa fa-play" aria-hidden="true"></i>&nbsp;
+          </button>
         </div>
         <div id="electionVoteChart" style="margin-bottom: 1em;"></div>
         <pre id="electionOutput" style="white-space: pre-wrap;"></pre>
@@ -155,6 +160,7 @@
       var currentElection;
       var electionResults;
       var dataTable;
+      var electionPlayInterval;
 
       if (localStorage.elections) {
         elections = JSON.parse(localStorage.elections);
@@ -206,6 +212,30 @@
           return false;
         });
 
+        $('button#playPauseElectionRounds').click(function () {
+          var lastRound = Object.keys(electionResults.votes).length;
+          if (electionPlayInterval) {
+            clearInterval(electionPlayInterval);
+            electionPlayInterval = undefined;
+            $('button#playPauseElectionRounds i').removeClass('fa-pause').addClass('fa-play');
+          }
+          else {
+            $('button#playPauseElectionRounds i').removeClass('fa-play').addClass('fa-pause');
+            electionPlayInterval = setInterval(function () {
+              var currentRound = parseInt($('input#electionRound').val());
+              if (currentRound === lastRound) {
+                clearInterval(electionPlayInterval);
+                electionPlayInterval = undefined;
+                $('button#playPauseElectionRounds i').removeClass('fa-pause').addClass('fa-play');
+              }
+              else {
+                $('input#electionRound').slider('setValue', currentRound + 1);
+                updateVotesChart();
+              }
+            }, 5000);
+          }
+        });
+
         $('button#computeElection').click(computeElectionResults);
       });
 
@@ -221,6 +251,7 @@
             tooltip: 'hide',
             ticks: Object.keys(data.votes).map(function (x) { return parseInt(x) + 1}),
             ticks_labels: Object.keys(data.votes).map(function (x) { return 'Round ' + (parseInt(x) + 1)}),
+            value: 1,
           }).change('slide', updateVotesChart);
           $('pre#electionOutput').text(data.output);
           $('div#electionRandomAlert').css('display', data.output.indexOf('random') == -1 ? 'none' : 'block');

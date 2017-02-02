@@ -53,4 +53,5 @@ def index():
     return app.send_static_file('index.html')
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    port = sys.argv[1] if len(sys.argv) > 1 else 8000
+    app.run(port=port)
