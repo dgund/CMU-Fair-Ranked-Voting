@@ -217,7 +217,7 @@ class TestSmallElections(unittest.TestCase):
     def test_3_candidates_2_seats(self):
         """Tests a 3 candidate election for 2 seats.
 
-        Expected winners: C
+        Expected winners: B, C
 
         Round 0
             Ballots:
