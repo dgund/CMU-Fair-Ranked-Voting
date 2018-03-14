@@ -11,7 +11,7 @@ __license__ = "GPLv3"
 __status__ = "Production"
 
 
-class Candidate:
+class Candidate(object):
     """Candidate with a name and unique identifier.
 
     Attributes:
@@ -21,50 +21,20 @@ class Candidate:
     """
 
     def __init__(self, uid, name=None):
-        """Initializes Candidate with name and uid.
-
-        Args:
-            uid: String representing the unique identifier of the Candidate.
-                Used for equality, hashing, and ordering in a random tiebreak.
-            name: String representing the name of the Candidate.
-        """
         self.uid = uid
         self.name = name
 
     def __eq__(self, other):
-        """Checks equality between two Candidates using uids.
-
-        Args:
-            other: Candidate to check equality with.
-
-        Returns:
-            Boolean indicating if the Candidates are equal or not.
-        """
         if isinstance(other, Candidate):
             return self.uid == other.uid
 
     def __hash__(self):
-        """Returns the hash value of the Candidate.
-
-        Returns:
-            Integer hash value of the Candidate.
-        """
         return hash(self.uid)
 
     def __repr__(self):
-        """Returns a printable system representation of the Candidate.
-
-        Returns:
-            String containing the printable representation of the Candidate.
-        """
         return 'Candidate({!r}, name={!r})'.format(self.uid, self.name)
 
     def __str__(self):
-        """Returns a printable user representation of the Candidate.
-
-        Returns:
-            String containing the printable representation of the Candidate.
-        """
         return '{} ({})'.format(self.uid, self.name
                                 if self.name is not None else self.uid)
 
@@ -78,20 +48,14 @@ class NoConfidence(Candidate):
     """
 
     def __init__(self):
-        """Initializes NoConfidence."""
         self.uid = 'NC'
         self.name = 'No Confidence'
 
     def __repr__(self):
-        """Returns a printable system representation of NoConfidence.
-
-        Returns:
-            String containing the printable representation of NoConfidence.
-        """
         return 'NoConfidence()'
 
 
-class Ballot:
+class Ballot(object):
     """Ballot consisting of ranked candidates and a vote value
 
     The vote value of the ballot is awarded to the most preferred candidate that
@@ -118,25 +82,12 @@ class Ballot:
         self._preferred_active_rank = starting_rank
 
     def __eq__(self, other):
-        """Checks equality between two Ballots.
-
-        Args:
-            other: Ballot to check equality with.
-
-        Returns:
-            Boolean indicating if the Ballots are equal or not.
-        """
         if isinstance(other, Ballot):
             return (self.candidates == other.candidates and
                     self.vote_value == other.vote_value and
                     self._preferred_active_rank == other._preferred_active_rank)
 
     def __repr__(self):
-        """Returns a printable system representation of the Ballot.
-
-        Returns:
-            String containing the printable representation of the Ballot.
-        """
         return 'Ballot(candidates={!r}, vote_value={!r}, starting_rank={!r})'.format(
                self.candidates, self.vote_value, self._preferred_active_rank)
 
@@ -196,7 +147,7 @@ class Ballot:
         self._preferred_active_rank = 0
 
 
-class VoteTracker:
+class VoteTracker(object):
     """Vote Tracker for assigning votes to Candidates.
 
     Attributes:
@@ -205,44 +156,24 @@ class VoteTracker:
     """
 
     def __init__(self, votes_cast=0.0, votes_for_candidate=None):
-        """Initializes VoteTracker with votes cast and votes for candidates.
-
-        Args:
-            votes_cast: Float value of the total votes cast.
-            votes_for_candidate: Dict mapping Candidates to float values of
-                votes.
-        """
         self.votes_cast = votes_cast
         self._votes_for_candidate = (votes_for_candidate
                                      if votes_for_candidate is not None else dict())
 
     def __eq__(self, other):
-        """Checks equality between two VoteTrackers.
-
-        Args:
-            other: VoteTracker to check equality with.
-
-        Returns:
-            Boolean indicating if the VoteTrackers are equal or not.
-        """
         if isinstance(other, VoteTracker):
             return (self.votes_cast == other.votes_cast and
                     self._votes_for_candidate == other._votes_for_candidate)
 
     def __repr__(self):
-        """Returns a printable system representation of the VoteTracker.
-
-        Returns:
-            String containing the printable representation of the VoteTracker.
-        """
         return 'VoteTracker(votes_for_candidate={!r}, votes_cast={!r})'.format(
                 self._votes_for_candidate, self.votes_cast)
 
     def decription(self):
         """Returns a printable long-form user representation of the VoteTracker.
 
-        Returns:
-            String containing the printable representation of the VoteTracker.
+        :return String containing the printable representation of the
+            VoteTracker.
         """
         description = 'VoteTracker for {} votes:'.format(self.votes_cast)
         for candidate in sorted(self._votes_for_candidate, key=self._votes_for_candidate.get, reverse=True):
@@ -252,9 +183,8 @@ class VoteTracker:
     def cast_vote_for_candidate(self, candidate, vote_value):
         """Casts the vote for the Candidate, updating the stored vote totals.
 
-        Args:
-            candidate: Candidate to receive the vote.
-            vote_value: Float value of the vote.
+        :param candidate: Candidate to receive the vote.
+        :param vote_value: Float value of the vote.
         """
 
         if candidate is None:
@@ -278,31 +208,26 @@ class VoteTracker:
     def votes_for_candidate(self, candidate):
         """Returns the value of the votes for the given Candidate.
 
-        Args:
-            Candidate: Candidate to obtain the vote value.
+        :param candidate: Candidate to obtain the vote value.
 
-        Returns:
-            Float value of the votes for the Candidate.
+        :return Float value of the votes for the Candidate.
         """
         return self._votes_for_candidate.get(candidate, 0.0)
 
     def candidates(self):
         """Returns the Candidate(s) being tracked.
 
-        Returns:
-            Set of candidates being tracked.
+        :return Set of candidates being tracked.
         """
         return set(self._votes_for_candidate.keys())
 
     def candidates_reaching_threshold(self, candidates, threshold):
         """Returns the Candidate(s) with vote values meeting the threshold.
 
-        Args:
-            candidates: Set of Candidates to check.
-            threshold: Float value of the vote threshold.
+        :param candidates: Set of Candidates to check.
+        :param threshold: Float value of the vote threshold.
 
-        Returns:
-            Set of Candidates meeting the vote threshold.
+        :return  Set of Candidates meeting the vote threshold.
         """
         candidates_reaching_threshold = set()
 
@@ -316,11 +241,9 @@ class VoteTracker:
     def candidates_with_fewest_votes(self, candidates):
         """Returns the Candidate(s) with the fewest votes.
 
-        Args:
-            candidates: Set of Candidates to check.
+        :param candidates: Set of Candidates to check.
 
-        Returns:
-            Set of Candidates with the fewest votes.
+        :return Set of Candidates with the fewest votes.
         """
         candidates_with_fewest_votes = set()
         fewest_votes = -1
@@ -338,7 +261,7 @@ class VoteTracker:
         return candidates_with_fewest_votes
 
 
-class ElectionRound:
+class ElectionRound(object):
     """Election data for a round of voting.
 
     Attributes:
@@ -353,16 +276,6 @@ class ElectionRound:
     def __init__(self, candidates_elected=None, candidates_eliminated=None,
                  threshold=0, random_tiebreak_occurred=False,
                  vote_tracker=None):
-        """Initializes ElectionRound with threshold, Candidate, and vote data.
-
-        Args:
-            candidates_elected: Set of Candidates elected in this round.
-            candidates_eliminated: Set of Candidates eliminated in this round.
-            threshold: Float value of the vote threshold to be elected.
-            random_tiebreak_occured: Boolean indicating if a random tiebreak
-                occurred or not in this round.
-            vote_tracker: VoteTracker for counting votes in this round.
-        """
         self.threshold = threshold
         self.candidates_elected = (candidates_elected if candidates_elected is not None else set())
         self.candidates_eliminated = (candidates_eliminated if candidates_eliminated is not None else set())
@@ -370,11 +283,6 @@ class ElectionRound:
         self.vote_tracker = (vote_tracker if vote_tracker is not None else VoteTracker())
 
     def __repr__(self):
-        """Returns a printable system representation of the ElectionRound.
-
-        Returns:
-            String containing the printable representation of the ElectionRound.
-        """
         return 'ElectionRound(threshold={!r}, candidates_elected={!r}, candidates_eliminated={!r}, random_tiebreak_occurred={}, vote_tracker={!r})'.format(
             self.threshold, self.candidates_elected, self.candidates_eliminated, self.random_tiebreak_occurred, self.vote_tracker)
 
@@ -402,7 +310,7 @@ class ElectionRound:
         return description
 
 
-class ElectionResults:
+class ElectionResults(object):
     """Election results and data for all rounds.
 
     Attributes:
@@ -418,17 +326,6 @@ class ElectionResults:
     def __init__(self, ballots, candidates_elected,
                  election_rounds, random_alphanumeric,
                  seats, name=''):
-        """Initializes ElectionResults with election results and data.
-
-        Args:
-            ballots: List of all Ballots.
-            candidates_elected: Set of Candidates elected.
-            election_rounds: List of ElectionRounds.
-            random_alphanumeric: String containing the random alphanumeric used
-                for final tiebreaks.
-            seats: Number of vacant seats before the election.
-            name: String representing the name of the election.
-        """
         self.ballots = ballots
         self.candidates_elected = candidates_elected
         self.election_rounds = election_rounds
@@ -437,12 +334,6 @@ class ElectionResults:
         self.seats = seats
 
     def __repr__(self):
-        """Returns a printable system representation of the ElectionResults.
-
-        Returns:
-            String containing the printable representation of the
-            ElectionResults.
-        """
         return 'ElectionResults(name={!r}, seats={!r}, ballots={!r}, random_alphanumeric={!r}, candidates_elected={!r}, election_rounds={!r})'.format(
                     self.name, self.seats, self.ballots, self.random_alphanumeric, self.candidates_elected, self.election_rounds)
 
@@ -450,9 +341,8 @@ class ElectionResults:
         """Returns a printable long-form user representation of the
             ElectionResults.
 
-        Returns:
-            String containing the printable representation of the
-                ElectionResults.
+        :return String containing the printable representation of the
+            ElectionResults.
         """
         description = 'Results for election {}:\n'.format(self.name)
         if len(self.candidates_elected) > 0:
@@ -468,7 +358,7 @@ class ElectionResults:
         return description
 
 
-class Election:
+class Election(object):
     """Election configuration and computation.
 
     Attributes:
@@ -486,19 +376,6 @@ class Election:
 
     def __init__(self, ballots, seats, can_eliminate_no_confidence=True,
                  can_random_tiebreak=True, name='', random_alphanumeric=None):
-        """Initializes Election with ballots, seats, and configuration data.
-
-        Args:
-            ballots: List of all Ballots.
-            seats: Number of vacant seats before the election.
-            can_eliminate_no_confidence: Boolean indicating if No Confidence may
-                be eliminated in the election.
-            can_random_tiebreak: Boolean indicating if random elimination may be
-                used for final tiebreaks. Otherwise, the election is halted.
-            name: String representing the name of the election.
-            random_alphanumeric: String containing the rcandom alphanumeric used
-                for final tiebreaks.
-        """
         self.ballots = ballots
         self.can_eliminate_no_confidence = can_eliminate_no_confidence
         self.can_random_tiebreak = can_random_tiebreak
@@ -512,18 +389,16 @@ class Election:
         This threshold is the minimum number of votes a candidate must receive
         in order to be elected outright.
 
-        Args:
-            seats_vacant: Integer value of the seats vacant.
-            votes: Float value of the value of votes cast.
-        Returns: An int representing the vote quota
+        :param seats: Integer value of the seats vacant.
+        :param votes: Float value of the value of votes cast.
+        :return An int representing the vote quota
         """
         return (float(votes) / (float(seats) + 1.0)) + 1.0
 
     def compute_results(self):
         """Run the election using the single transferable vote algorithm.
 
-        Returns:
-            ElectionResults containing the election results and data.
+        :return ElectionResults containing the election results and data.
         """
 
         election_rounds = list()
@@ -764,7 +639,9 @@ class Election:
 
                 # Sort the candidates by uid according to the random
                 # alphanumeric.
-                candidates_random_sort = sorted(candidates_to_eliminate, key=lambda candidate: [tiebreak_alphanumeric.index(c) for c in candidate.uid])
+                candidates_random_sort = sorted(
+                    candidates_to_eliminate,
+                    key=lambda candidate: [tiebreak_alphanumeric.index(c) for c in candidate.uid])
                 # Eliminate the first candidate in this random sort that is not
                 # No Confidence.
                 for candidate in candidates_random_sort:

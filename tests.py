@@ -13,6 +13,35 @@ __credits__ = ["Sushain Cherivirala"]
 __license__ = "GPLv3"
 __status__ = "Production"
 
+CANDIDATE_IDS = {
+    'A': ('dgund', 'Devin Gund'),
+    'B': ('gwashington', 'George Washington'),
+    'C': ('jadams', 'John Adams'),
+    'D': ('tjefferson', 'Thomas Jefferson'),
+    'E': ('jmadison', 'James Madison'),
+    'F': ('jmonroe', 'James Monroe'),
+    'G': ('jqadams', 'John Quincy Adams'),
+    'H': ('ajackson', 'Andrew Jackson'),
+    'I': ('mvburen', 'Martin Van Buren'),
+    'J': ('wharrison', 'William Harrison'),
+    'K': ('jtyler', 'John Tyler'),
+    'L': ('jpolk', 'James Polk'),
+    'M': ('ztaylor', 'Zachary Taylor'),
+    'N': ('mfillmore', 'Millard Fillmore'),
+    'O': ('fpierce', 'Franklin Pierce'),
+    'P': ('jbuchanan', 'James Buchanan'),
+    'Q': ('alincoln', 'Abraham Lincoln'),
+    'R': ('ajohnson', 'Andrew Johnson'),
+    'S': ('ugrant', 'Ulysses Grant'),
+    'T': ('rhayes', 'Rutherford Hayes'),
+    'U': ('jgarfield', 'James Garfield'),
+    'V': ('carthur', 'Chester Arthur'),
+    'W': ('gcleveland', 'Grover Cleveland'),
+    'X': ('bharrison', 'Benjamin Harrison'),
+    'Y': ('wmckinley', 'William McKinley'),
+    'Z': ('troosevelt', 'Theodore Roosevelt'),
+}
+
 
 def candidates_for_ids(candidate_ids):
     """Returns an ordered list of Candidates for an ordered list of ids.
@@ -21,75 +50,34 @@ def candidates_for_ids(candidate_ids):
     short strings (i.e. 'A', 'B', 'NC') in the test cases, which can then be
     converted to proper Candidates.
 
-    Args:
-        candidate_ids: List of strings representing candidate ids.
+    :param candidate_ids: List of strings representing candidate ids.
 
-    Returns:
-        List of Candidates corresponding to the given ids.
+    :return List of Candidates corresponding to the given ids.
     """
-    candidate_for_id = {
-        'NC': NoConfidence(),
-        'A': Candidate('dgund', name='Devin Gund'),
-        'B': Candidate('gwashington', name='George Washington'),
-        'C': Candidate('jadams', name='John Adams'),
-        'D': Candidate('tjefferson', name='Thomas Jefferson'),
-        'E': Candidate('jmadison', name='James Madison'),
-        'F': Candidate('jmonroe', name='James Monroe'),
-        'G': Candidate('jqadams', name='John Quincy Adams'),
-        'H': Candidate('ajackson', name='Andrew Jackson'),
-        'I': Candidate('mvburen', name='Martin Van Buren'),
-        'J': Candidate('wharrison', name='William Harrison'),
-        'K': Candidate('jtyler', name='John Tyler'),
-        'L': Candidate('jpolk', name='James Polk'),
-        'M': Candidate('ztaylor', name='Zachary Taylor'),
-        'N': Candidate('mfillmore', name='Millard Fillmore'),
-        'O': Candidate('fpierce', name='Franklin Pierce'),
-        'P': Candidate('jbuchanan', name='James Buchanan'),
-        'Q': Candidate('alincoln', name='Abraham Lincoln'),
-        'R': Candidate('ajohnson', name='Andrew Johnson'),
-        'S': Candidate('ugrant', name='Ulysses Grant'),
-        'T': Candidate('rhayes', name='Rutherford Hayes'),
-        'U': Candidate('jgarfield', name='James Garfield'),
-        'V': Candidate('carthur', name='Chester Arthur'),
-        'W': Candidate('gcleveland', name='Grover Cleveland'),
-        'X': Candidate('bharrison', name='Benjamin Harrison'),
-        'Y': Candidate('wmckinley', name='William McKinley'),
-        'Z': Candidate('troosevelt', name='Theodore Roosevelt'),
-    }
 
-    candidates = []
-    for candidate_id in candidate_ids:
-        candidates.append(candidate_for_id[candidate_id])
-    return candidates
+    return [Candidate(*CANDIDATE_IDS[candidate_id])
+            if candidate_id != "NC" else NoConfidence()
+            for candidate_id in candidate_ids]
 
 
 def ballots_for_candidates(candidates, count):
     """Returns a list of Ballots for the given Candidates and count.
 
-    Args:
-        candidates: List of Candidates.
-        count: Integer value of the number of Ballots to create.
+    :param candidates: List of Candidates.
+    :param count: Integer value of the number of Ballots to create.
 
-    Returns:
-        List of Ballots for the given Candidates, with the given count.
+    :return List of Ballots for the given Candidates, with the given count.
     """
-    ballots = []
-    for i in range(count):
-        ballot = Ballot()
-        ballot.set_candidates(candidates)
-        ballots.append(ballot)
-    return ballots
+    return [Ballot(candidates) for _ in range(count)]
 
 
 def ballots_for_ids(candidate_ids, count):
     """Returns a list of Ballots for the given ids and count.
 
-    Args:
-        candidate_ids: List of strings representing candidate ids.
-        count: Integer value of the number of Ballots to create.
+    :param candidate_ids: List of strings representing candidate ids.
+    :param count: Integer value of the number of Ballots to create.
 
-    Returns:
-        List of Ballots for the given ids, with the given count.
+    :return List of Ballots for the given ids, with the given count.
     """
     return ballots_for_candidates(candidates_for_ids(candidate_ids), count)
 
@@ -229,7 +217,7 @@ class TestSmallElections(unittest.TestCase):
     def test_3_candidates_2_seats(self):
         """Tests a 3 candidate election for 2 seats.
 
-        Expected winners: C
+        Expected winners: B, C
 
         Round 0
             Ballots:
@@ -863,7 +851,7 @@ class TestLargeElections(unittest.TestCase):
         tiger = Candidate('tiger', name='Tiger')
         lynx = Candidate('lynx', name='Lynx')
 
-        expected_winners = set([gorilla, monkey, tiger])
+        expected_winners = {gorilla, monkey, tiger}
         seats = 3
         tiebreak_alphanumeric = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -906,7 +894,7 @@ class TestLargeElections(unittest.TestCase):
         jackalope = Candidate('jackalope', name='Jackalope')
         buffalo = Candidate('buffalo', name='Buffalo')
 
-        expected_winners = set([gorilla, silverback, owl, turtle, tiger])
+        expected_winners = {gorilla, silverback, owl, turtle, tiger}
         seats = 5
         tiebreak_alphanumeric = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -958,7 +946,7 @@ class TestLargeElections(unittest.TestCase):
         strawberries = Candidate('strawberries', name='Strawberries')
         sweets = Candidate('sweets', name='Sweets')
 
-        expected_winners = set([chocolate, oranges, strawberries])
+        expected_winners = {chocolate, oranges, strawberries}
         seats = 3
         tiebreak_alphanumeric = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -1013,7 +1001,7 @@ class TestLargeElections(unittest.TestCase):
         bush = Candidate('gbush', name='George Bush')
         gore = Candidate('agore', name='Al Gore')
         nader = Candidate('rnader', name='Ralph Nader')
-        expected_winners = set([gore])
+        expected_winners = {gore}
         seats = 1
         tiebreak_alphanumeric = 'abcdefghijklmnopqrstuvwxyz'
 
