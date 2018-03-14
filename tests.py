@@ -55,7 +55,7 @@ def candidates_for_ids(candidate_ids):
     :return List of Candidates corresponding to the given ids.
     """
 
-    return [Candidate(CANDIDATE_IDS[candidate_id])
+    return [Candidate(*CANDIDATE_IDS[candidate_id])
             if candidate_id != "NC" else NoConfidence()
             for candidate_id in candidate_ids]
 

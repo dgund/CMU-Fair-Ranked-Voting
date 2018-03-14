@@ -3,14 +3,15 @@ import numpy as np
 import pandas as pd
 from typing import Iterable
 
-import argparse
 import logging
 import string
 
+# To get debug output, just do:
 # logging.basicConfig(level=logging.INFO)
 
 
-def stv(raw_ballots, seats, eliminate_NC=True, tiebreak=None):
+def stv(raw_ballots, seats, eliminate_NC=True, no_confidence='NC',
+        tiebreak=None):
     # type: (Iterable, int, bool, str) -> set
     """
     :param raw_ballots: np.array, columns are preferences, rows are voters
@@ -143,8 +144,8 @@ def stv(raw_ballots, seats, eliminate_NC=True, tiebreak=None):
     def least_preferred_candidate():
         """ Implementation of tiebreak rules """
         lpc = stats.sort_values()
-        if not eliminate_NC and 'NC' in lpc:
-            lpc = lpc.drop('NC')
+        if not eliminate_NC and no_confidence in lpc:
+            lpc = lpc.drop(no_confidence)
         # it looks like bulk elimination is the same as sequential
         lpc = lpc[lpc == lpc.min()].keys()
         if len(lpc) == 1:
@@ -162,7 +163,7 @@ def stv(raw_ballots, seats, eliminate_NC=True, tiebreak=None):
             log.info("There is no clear anti winner, let's try one step back")
 
         log.info("Ok, backward tie break didn't work. let's look who has "
-                  "the most next choice votes")
+                 "the most next choice votes")
         # count, how many votes will each of remaining candidates have
         # if all others are eliminated
         scores = pd.Series(0, index=lpc)
@@ -237,7 +238,7 @@ def stv(raw_ballots, seats, eliminate_NC=True, tiebreak=None):
         log.info("Threshold: %s", threshold)
         log.info("Winners: %s", winners)
 
-        if len(winners) == seats or 'NC' in winners:
+        if len(winners) == seats or no_confidence in winners:
             return winners
 
         if len(winners) == winners_before:
